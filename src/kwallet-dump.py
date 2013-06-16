@@ -3,6 +3,7 @@ import argparse
 import getpass
 import sys
 import reader
+import kwallet
 
 def parse_filename(args):
     parser = argparse.ArgumentParser(description='Dump a .kwl kwallet file')
@@ -21,7 +22,13 @@ def main():
 
     password = getpass.getpass('Wallet Password: ')
     wallet.set_password(password)
-    print(wallet.decrypt())
+
+    decrypted = wallet.decrypt()
+
+    wallet = kwallet.KWallet(decrypted)
+    for entry in wallet.get_entries():
+        print(entry)
+
 
 if __name__ == '__main__':
     main()
