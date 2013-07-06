@@ -56,6 +56,8 @@ class KWalletReader:
                 4 Get the actual encrypted text, verify it's divisible by block_size and return it
         '''
         offset = 0
+
+        # This might have been better handled with StringIO
         offset = self._verify_magic(offset)
         offset = self._verify_compatibility(offset)
         offset = self._weird_loop(offset)

@@ -80,6 +80,9 @@ class KWallet:
                     self.entries.append([entry_type, folder, key, value])
 
     def get_entries(self):
+        '''
+            Return flattened list of entries
+        '''
         return self.entries
 
     def _read_int(self, f):
