@@ -5,7 +5,7 @@ import sys
 import reader
 import kwallet
 
-def parse_filename(args):
+def parse_filename():
     parser = argparse.ArgumentParser(description='Dump a .kwl kwallet file')
     parser.add_argument('filename', help='Location of kwallet file')
 
@@ -13,7 +13,7 @@ def parse_filename(args):
     return args.filename
 
 def main():
-    filename = parse_filename(sys.argv)
+    filename = parse_filename()
     try:
         wallet = reader.KWalletReader(filename)
     except reader.InvalidKWallet as e:
