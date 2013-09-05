@@ -32,7 +32,7 @@ def password2hash(password):
 
 def get_blocks(text, block_size):
     ''' Divide a string into equal sized blocks '''
-    return [text[start:start+block_size] for start in range(0, len(text), block_size)]
+    return [text[start:start+block_size] for start in range(0, len(text), block_size)] or ['']
 
 def switch_endianness(s):
     ''' Switch the endianness of byte string '''
