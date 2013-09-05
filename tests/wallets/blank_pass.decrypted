@@ -1,0 +1,4 @@
+[1, 'Passwords', 'abcdef', 'qwerty']
+[2, 'Passwords', 'bindata', '']
+[3, 'Passwords', 'kde.org', ('key2', 'value2')]
+[3, 'Passwords', 'kde.org', ('key1', 'value1')]
