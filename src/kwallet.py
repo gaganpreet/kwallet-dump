@@ -21,11 +21,12 @@ class KWallet:
             Arguments:
                 contents: QDataStream binary encoded string
         '''
+        self.entries = []
         self.initialize(contents)
         
     def initialize(self, contents):
         '''
-            Initializes the KWallet stream into a flattened list
+            Initializes the KWallet encrypted stream into a flattened list
             Arguments:
                 contents
 
@@ -45,15 +46,14 @@ class KWallet:
         # Reading the string as a file is convenient because it's a stream
         f = BytesIO(contents[12:12+size])
 
-        self.entries = []
-
         while f.tell() < size:
             folder = self._read_str(f)
 
             folder_size = self._read_int(f)
 
-            for i in range(folder_size):
+            for _ in range(folder_size):
                 key = self._read_str(f)
+
                 ''' Note about entry types:
                     1 -> Password
                     2 -> Binary data
@@ -70,10 +70,11 @@ class KWallet:
                 if entry_type == 3:
                     self._read_int(f)
                     value_count = self._read_int(f)
-                    for j in range(value_count):
+                    for _ in range(value_count):
                         map_key = self._read_str(f, entry_type)
                         map_value = self._read_str(f, entry_type)
-                        self.entries.append([entry_type, folder, key, (map_key, map_value)])
+                        self.entries.append([entry_type, folder, key, 
+                                            (map_key, map_value)])
 
                 if entry_type == 1 or entry_type == 2:
                     value = self._read_str(f, entry_type)
@@ -86,14 +87,25 @@ class KWallet:
         return self.entries
 
     def _read_int(self, f):
+        '''
+            Read an integer from file from the current location
+        '''
         return util.to_int(f.read(4))
 
     def _read_str(self, f, entry_type=1):
-        l = self._read_int(f)
-        # Null values are stored as UINT_MAX
-        if l == (1 << 32) - 1:
+        '''
+            Read a QString from file from the current location
+
+            Depending on the entry type (binary vs rest), the string may be stored as it is
+            or UTF-16
+
+        '''
+        nbytes = self._read_int(f)
+        # Null strings are stored as UINT_MAX
+        if nbytes == (1 << 32) - 1:
             return ''
-        s = f.read(l)
+
+        s = f.read(nbytes)
         if entry_type != 2:
             s = str(s, 'utf-16-be')
         return s
