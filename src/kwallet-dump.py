@@ -2,8 +2,7 @@
 import argparse
 import getpass
 import sys
-import reader
-import kwallet
+from kwallet_dump import kwallet, reader
 
 def parse_filename():
     parser = argparse.ArgumentParser(description='Dump a .kwl kwallet file')

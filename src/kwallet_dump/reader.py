@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import util
+from . import util
 from Crypto.Cipher import Blowfish
 
 class InvalidKWallet(Exception): pass

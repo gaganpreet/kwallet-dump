@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import util
+from . import util
 from io import BytesIO
 
 class KWallet:
