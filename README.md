@@ -5,6 +5,12 @@ The output is not polished because it serves a simple utility - to get passwords
 
 If you are looking to get Chrome passwords out of this - it'll be a bit difficult because Chrome stores the passwords in a serialized blob and you'll have to decipher that format. For everything else - Firefox, Telepathy, Amarok, Wifi passwords, other apps which store passwords - it works perfectly fine.
 
+# Install
+
+Easiest way to install is to use pip which will fetch the dependencies automatically
+
+    pip install kwallet-dump
+
 # Output
 * Fields:
     + Type of KWallet entry - there are 3 - Password, Binary Data and Map. The sample output here shows the third format
