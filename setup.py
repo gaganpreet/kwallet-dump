@@ -5,6 +5,7 @@ from distutils.core import setup
 requirements = [pkg.split('=')[0] for pkg in open('requirements.txt').readlines()]
 
 classifiers = ['Environment :: Console',
+               'Programming Language :: Python :: 2',
                'Programming Language :: Python :: 3',
                'Topic :: Desktop Environment :: K Desktop Environment (KDE)',
                'Operating System :: POSIX :: Linux',

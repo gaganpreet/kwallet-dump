@@ -29,5 +29,5 @@ Easiest way to install is to use pip which will fetch the dependencies automatic
         [3, 'Firefox', 'admin,,DD-WRT,http://192.168.1.1', ('formSubmitURL', '')]
 
 # Requirements
-* Python 3
+* Python 2 or 3
 * pycrypto (for decoding Blowfish)

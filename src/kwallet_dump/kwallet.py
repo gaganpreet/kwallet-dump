@@ -107,6 +107,6 @@ class KWallet:
 
         s = f.read(nbytes)
         if entry_type != 2:
-            s = str(s, 'utf-16-be')
+            s = s.decode('utf-16-be')
         return s
 
