@@ -1,0 +1,4 @@
+- 1.0.1
+    * Compatibility with Python 2
+- 1.0.0
+    * Initial release for upload on PyPi
