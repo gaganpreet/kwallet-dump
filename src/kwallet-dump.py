@@ -4,17 +4,21 @@ import getpass
 import sys
 from kwallet_dump import kwallet, reader
 
-def parse_filename():
+def parse_args():
     parser = argparse.ArgumentParser(description='Dump a .kwl kwallet file')
     parser.add_argument('filename', help='Location of kwallet file')
+    parser.add_argument(
+        'salt_filename',
+        help='Location of salt file for PBKDF2-derived files (since KDE 4.13)',
+        nargs='?',
+    )
 
-    args = parser.parse_args()
-    return args.filename
+    return parser.parse_args()
 
 def main():
-    filename = parse_filename()
+    args = parse_args()
     try:
-        wallet = reader.KWalletReader(filename)
+        wallet = reader.KWalletReader(args.filename, args.salt_filename)
     except reader.InvalidKWallet as e:
         print('Invalid file error: ' + str(e))
         sys.exit(1)
