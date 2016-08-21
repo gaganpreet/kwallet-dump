@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 from . import util
 from Crypto.Cipher import Blowfish
+from Crypto.Protocol.KDF import PBKDF2
+from Crypto.Hash import SHA512, HMAC
+
+import struct
 
 class InvalidKWallet(Exception): pass
 class PasswordMissing(Exception): pass
@@ -10,19 +14,20 @@ class KWalletReader:
         Class to read a kwallet file, verify it's valid, 
         use password to decrypt and keep the encrypted part
     '''
-    def __init__(self, filename, password=None):
+    def __init__(self, filename, salt_filename=None, password=None):
         ''' Initialize a KWallet.
 
             Arguments:
                 filename: Path to KWallet file
                 password: Password for the wallet
         '''
+        self.salt_filename = salt_filename
         with open(filename, "rb") as kwallet_file:
             self.encrypted = self.parse_and_verify_kwallet(kwallet_file)
 
             self.key = None
             if password:
-                self.key = util.password2hash(password)
+                self.key = self.set_password(self, password)
 
     def set_password(self, password):
         ''' Set a password for the KWallet
@@ -32,7 +37,17 @@ class KWalletReader:
             Return:
                 None
         '''
-        self.key = util.password2hash(password)
+        if self.sha512pbkdf2:
+            if not self.salt_filename:
+                raise InvalidKWallet('A salt file is required for this format, typically located in the same directory as the .kwl')
+            with open(self.salt_filename, 'rb') as salt_file:
+                salt = salt_file.read()
+
+            # PBKDF2 parameters are constants in
+            # kwallet/src/runtime/kwalletd/backend/kwalletbackend.h
+            self.key = PBKDF2(password, salt, dkLen=56, count=50000, prf=lambda p,s: HMAC.new(p,s,SHA512).digest())
+        else:
+            self.key = util.password2hash(password)
 
     def decrypt(self):
         ''' Decrypt a kwallet '''
@@ -58,7 +73,7 @@ class KWalletReader:
                 4 Get the actual encrypted text, verify it's divisible by block_size and return it
         '''
         self._verify_magic(kwallet_file)
-        self._verify_compatibility(kwallet_file)
+        self._parse_format_header(kwallet_file)
         self._weird_loop(kwallet_file)
 
         remaining = kwallet_file.read()
@@ -73,17 +88,24 @@ class KWalletReader:
         if kwallet_file.read(magic_len) != kwallet_magic:
             raise InvalidKWallet('Magic header doesn\'t match')
 
-    @staticmethod
-    def _verify_compatibility(kwallet_file):
-        ''' Verify kwallet compatibility
+    def _parse_format_header(self, kwallet_file):
+        ''' Verify kwallet compatibility and parse the cipher specified in the
+            file header.
+
             Details of kwallet_info:
                 # First byte - major version - should be 0
                 # Second byte - minor version - should be 0
                 # Third byte - cipher used - CBC == 0
                 # Fourth byte - hash used - SHA1 == 0
         '''
-        if kwallet_file.read(4) != b'\0'*4:
-            raise InvalidKWallet('Filetype not supported')
+        (major, minor, cipher, hashtype) = struct.unpack("bbbb", kwallet_file.read(4))
+        if major == 0 and minor == 0 and cipher == 0 and hashtype == 0:
+            self.sha512pbkdf2 = False
+            return
+        if major == 0 and minor == 1 and cipher == 0 and hashtype == 2:
+            self.sha512pbkdf2 = True
+            return # hashing is PBKDF2
+        raise InvalidKWallet('Filetype not supported')
 
     @staticmethod
     def _weird_loop(kwallet_file):
